@@ -7,122 +7,122 @@ class gameState extends Phaser.Scene
 
     preload()
     {
-        //// UPLOAD ASSETS TO MEMORY ////
+       this.cameras.main.setBackgroundColor("113"); 
 
-        this.cameras.main.setBackgroundColor("AAA");
+       this.load.setPath('assets/sprites');
+       // Load Background sprites
+       this.load.image('bg_back', 'background_back.png'); 
+       this.load.image('bg_frontal', 'background_frontal.png'); 
 
-        this.load.image('bg_sky', 'assets/sprites/bg.jpg'); 
-        this.load.image('bird', 'assets/sprites/bird.png'); 
-        this.load.spritesheet('birdAnim', 'assets/sprites/birdAnim.png', 
-            { frameWidth: 17, frameHeight: 12 }
-        ); 
+       // Load bullet
+       this.load.image('bullet', 'spr_bullet_0.png'); 
 
-        this.load.image('bg_grass', 'assets/sprites/grass.png'); 
-        this.load.spritesheet('link', 'assets/sprites/link.png', 
-            { frameWidth: 120, frameHeight: 130 }
-        ); 
-
+       // Load spaceship
+       this.load.spritesheet('spaceship', 'naveAnim.png', 
+       {frameWidth: 16, frameHeight: 24}); 
     }
 
     create()
     {
-        //// DRAW ASSETS ////
+        // Background variables
+        this.bg_back = this.add.tileSprite(0, 0, config.width, config.height, 'bg_back').setOrigin(0); 
+        this.bg_frontal = this.add.tileSprite(0, 0, config.width, config.height, 'bg_frontal').setOrigin(0); 
 
-        /* IMAGES & SPRITES:
-            - image: static images with no feedback
-            - sprite: for events that need som efeedback
-            -  tile sprite: element that must be repited (ex. the floor) With the tile sprite we can make the illusion that the sprite is moving
-        */
+        // Spaceship animation
+        this.spaceship = this.physics.add.sprite(config.width*0.5, config.height*0.95, 'spaceship').setScale(2); 
+        this.spaceship.body.setCollideWorldBounds(true);
+        this.loadAnimationSpaceship();
+        this.spaceship.anims.play('idle'); 
+ 
+        // Inputs 
+        this.cursors = this.input.keyboard.createCursorKeys();
 
-        //// BIRD ////
-            // this.bg_sky = this.add.tileSprite(0, 0, config.width, config.height,'bg_sky').setOrigin(0);
-            
-            // this.birdAnim = this.add.sprite(config.width/2, config.height/2,'birdAnim').setScale(3);
-            // this.loadAnimationBird(); 
-            // this.birdAnim.anims.play('fly'); 
-
-        //// LINK ////
-        this.bg_grass = this.add.tileSprite(0, 0, config.width, config.height,'bg_grass').setOrigin(0);
-        this.link = this.add.sprite(config.width/2, config.height/2,'link').setScale(0.5);
-        this.loadAnimationLink(); 
-
-        // Listener to the inputs
-        //this.key_right = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT); 
-        this.cursors = this.input.keyboard.createCursorKeys(); 
+        // Bullet instance
+        this.loadBulletPools();
+        this.cursors.space.on
+        (
+            'up',
+            function()
+            {
+                this.createBullet();
+            }, 
+            this // contexto del this dentro de la funcion pasa a ser el de la escena
+        );
     }
 
-    loadAnimationBird()
+    loadAnimationSpaceship()
     {
         // Make the transition for the spritesheets
         this.anims.create(
         {
-            key: 'fly', 
-            frames: this.anims.generateFrameNumbers('birdAnim', {start: 0, end: 2}), 
-            frameRate: 10, 
-            repeat: -1, 
-            yoyo: true
+            key: 'idle',
+            frames: this.anims.generateFrameNumbers('spaceship', {start: 0, end: 1}),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create(
+        {
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('spaceship', {start: 2, end: 3}),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create(
+        {
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('spaceship', {start: 4, end: 5}),
+            frameRate: 10,
+            repeat: -1
         });
     }
 
-    loadAnimationLink()
+    loadBulletPools()
     {
-        // Make the transition for the spritesheets
-        this.anims.create(
-            {
-                key: 'walkDown', 
-                frames: this.anims.generateFrameNumbers('link', {start: 0, end: 9}), 
-                frameRate: 10, 
-                repeat: -1
-            });
-        this.anims.create(
-            {
-                key: 'walkLeft', 
-                frames: this.anims.generateFrameNumbers('link', {start: 10, end: 19}), 
-                frameRate: 10, 
-                repeat: -1
-            });
-        this.anims.create(
-            {
-                key: 'walkUp', 
-                frames: this.anims.generateFrameNumbers('link', {start: 20, end: 29}), 
-                frameRate: 10, 
-                repeat: -1
-            });
-        this.anims.create(
-            {
-                key: 'walkRight', 
-                frames: this.anims.generateFrameNumbers('link', {start: 30, end: 39}), 
-                frameRate: 10, 
-                repeat: -1
-            });
+        this.bulletPool = this.physics.add.group(); 
+    }
+
+    createBullet()
+    {
+        var tempBullet = this.bulletPool.getFirst(false); // search for the first bullet not active
+
+        if(!tempBullet)
+        {   // There are no left bullets
+            console.log('create bullet'); 
+            tempBullet = new bulletPrefab(this, this.spaceship.x, this.spaceship.y); 
+            this.bulletPool.add(tempBullet); 
+        }
+        else
+        {   // Existing a bullet active in the pool 
+            console.log('recicle bullet'); 
+            tempBullet.setActive(true); 
+            tempBullet.body.reset(this.spaceship.x, this.spaceship.y); 
+        }
+        // Give velocity
+        tempBullet.body.setVelocityY(gamePrefs.BULLET_SPEED); 
+        // Sounds
+        // ...
     }
 
     update()
     {
-        //// LINK INPUTS ////
-        this.velocity = 3; 
-        if(this.cursors.right.isDown) {
-            this.link.x += this.velocity;
-            this.link.anims.play('walkRight', true);
+        // Background move
+        this.bg_back.tilePositionY -= 0.25; 
+        this.bg_frontal.tilePositionY -= 0.5;
+        
+        // Spaceship logic (inputs and anim.)
+        if(this.cursors.right.isDown) 
+        {
+            this.spaceship.body.velocity.x += gamePrefs.SPACESHIP_SPEED; // without accelearation ==> this.spaceship.body.setVelocityX(gamePrefs.SPACESHIP_SPEED);
+            this.spaceship.anims.play('right', true);
         }
-        else if(this.cursors.left.isDown) {
-            this.link.x -= this.velocity;
-            this.link.anims.play('walkLeft', true);
+        else if(this.cursors.left.isDown) 
+        {
+            this.spaceship.body.velocity.x -= gamePrefs.SPACESHIP_SPEED;
+            this.spaceship.anims.play('left', true);
         }
-        else if(this.cursors.down.isDown) {
-            this.link.y += this.velocity; 
-            this.link.anims.play('walkDown', true);
-        }
-        else if(this.cursors.up.isDown) {
-            this.link.y -= this.velocity; 
-            this.link.anims.play('walkUp', true);
-        }
-        else {
-            this.link.anims.stop(); 
-            if(this.link.progress < 10)
-            {
-                this.link.setFrame(0);
-            }
+        else 
+        {
+            this.spaceship.anims.play('idle', true);
         }
     }
 }
