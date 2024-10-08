@@ -1,7 +1,8 @@
 var gamePrefs = 
 {
     SPACESHIP_SPEED: 2, 
-    BULLET_SPEED: -100
+    BULLET_SPEED: -100,
+    ENEMY_SPEED: 100
 }
 
 var config = 
@@ -10,12 +11,15 @@ var config =
     width: 370, 
     height: 550,
     scene: [gameState], 
-    render: {
+    render: 
+    {
         pixelArt:true
     }, 
-    physics: {
+    physics: 
+    {
         default: 'arcade', // collisions with quad. bounding box
-        arcade:{
+        arcade:
+        {
             gravity: {y: 0}, 
             debug:true
         }
