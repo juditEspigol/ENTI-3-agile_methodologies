@@ -2,7 +2,8 @@ var gamePrefs =
 {
     SPACESHIP_SPEED: 2, 
     BULLET_SPEED: -100,
-    ENEMY_SPEED: 100
+    ENEMY_BULLET_SPPED: 100,
+    ENEMY_SPEED: 40
 }
 
 var config = 

@@ -14,8 +14,13 @@ class gameState extends Phaser.Scene
        this.load.image('bg_back', 'background_back.png'); 
        this.load.image('bg_frontal', 'background_frontal.png'); 
 
+       // Load UI
+       this.load.spritesheet('armor', 'spr_armor.png', 
+        {frameWidth: 66, frameHeight: 28}); 
+
        // Load bullet
        this.load.image('bullet', 'spr_bullet_0.png'); 
+       this.load.image('enemy_bullet', 'spr_enemy_bullet_0.png'); 
 
        // Load explosion
        this.load.spritesheet('explosion', 'explosion.png', 
@@ -26,28 +31,26 @@ class gameState extends Phaser.Scene
         {frameWidth: 32, frameHeight: 16}); 
 
        // Load spaceship
-       this.load.spritesheet('spaceship', 'naveAnim.png', 
+       this.load.spritesheet('player', 'naveAnim.png', 
        {frameWidth: 16, frameHeight: 24}); 
     }
 
     create()
-    {
-        // Background variables
+    {  
+        // Inputs 
+        this.cursors = this.input.keyboard.createCursorKeys();
+        // Animations
+        this.loadAnimationExplosion();
+        this.loadAnimationEnemy();
+        this.loadAnimationSpaceship();
+        // Pools
+        this.loadPools(); 
+        
+        // Last layer --> Background variables
         this.bg_back = this.add.tileSprite(0, 0, config.width, config.height, 'bg_back').setOrigin(0); 
         this.bg_frontal = this.add.tileSprite(0, 0, config.width, config.height, 'bg_frontal').setOrigin(0); 
 
-        // Spaceship animation
-        this.spaceship = this.physics.add.sprite(config.width*0.5, config.height*0.95, 'spaceship').setScale(2); 
-        this.spaceship.body.setCollideWorldBounds(true);
-        this.loadAnimationSpaceship();
-        this.spaceship.anims.play('idle'); 
-
-        // Pools
-        this.loadPools(); 
-
-        // Enemy animation
-        this.loadAnimationEnemy();
-        this.createEnemy();
+        // Enemy instance
         this.time.addEvent(
             {
                 delay: 2 * 1000, 
@@ -55,9 +58,6 @@ class gameState extends Phaser.Scene
                 callbackScope: this, 
                 loop: true
             });
- 
-        // Inputs 
-        this.cursors = this.input.keyboard.createCursorKeys();
 
         // Bullet instance
         this.cursors.space.on
@@ -68,10 +68,7 @@ class gameState extends Phaser.Scene
                 this.createBullet();
             }, 
             this // contexto del this dentro de la funcion pasa a ser el de la escena
-        );
-
-        // Explosion instance
-        this.loadAnimationExplosion();
+        ) ;
 
         // Collision enemy with bullet
         this.physics.add.overlap
@@ -82,6 +79,31 @@ class gameState extends Phaser.Scene
             null, // process callback: lo que devolveria el callback
             this // callback context
         );
+
+        // 2nd layer --> Spaceship animation
+        this.spaceship = new playerPrefab(this, config.width * 0.5, config.height * 0.95);
+
+        // Collision enemy with bullet
+        this.physics.add.overlap
+        (
+            this.spaceship, // obj 1
+            this.enemyBulletPool, // obj 2
+            this.killPlayer, // callback
+            null, // process callback: lo que devolveria el callback
+            this // callback context
+        );
+
+        this.physics.add.overlap
+        (
+            this.spaceship, // obj 1
+            this.enemyPool, // obj 2
+            this.killPlayer, // callback
+            null, // process callback: lo que devolveria el callback
+            this // callback context
+        );
+
+        // 1st layer --> Load UI
+        this.armor = this.add.sprite(5, 5, 'armor').setOrigin(0).setFrame(4).setDepth(1); 
     }
 
     loadAnimationSpaceship()
@@ -90,21 +112,21 @@ class gameState extends Phaser.Scene
         this.anims.create(
         {
             key: 'idle',
-            frames: this.anims.generateFrameNumbers('spaceship', {start: 0, end: 1}),
+            frames: this.anims.generateFrameNumbers('player', {start: 0, end: 1}),
             frameRate: 10,
             repeat: -1
         });
         this.anims.create(
         {
             key: 'left',
-            frames: this.anims.generateFrameNumbers('spaceship', {start: 2, end: 3}),
+            frames: this.anims.generateFrameNumbers('player', {start: 2, end: 3}),
             frameRate: 10,
             repeat: -1
         });
         this.anims.create(
         {
             key: 'right',
-            frames: this.anims.generateFrameNumbers('spaceship', {start: 4, end: 5}),
+            frames: this.anims.generateFrameNumbers('player', {start: 4, end: 5}),
             frameRate: 10,
             repeat: -1
         });
@@ -126,7 +148,8 @@ class gameState extends Phaser.Scene
                 key: 'explote',
                 frames: this.anims.generateFrameNumbers('explosion', {start: 0, end: 4}),
                 frameRate: 10,
-                repeat: 0
+                repeat: 0,
+                hideOnComplete: true
             });
     }
 
@@ -134,6 +157,7 @@ class gameState extends Phaser.Scene
     {
         this.enemyPool = this.physics.add.group(); 
         this.bulletPool = this.physics.add.group(); 
+        this.enemyBulletPool = this.physics.add.group(); 
         this.explosionPool = this.add.group(); 
     }
 
@@ -141,7 +165,7 @@ class gameState extends Phaser.Scene
     {
         var tempEnemy = this.enemyPool.getFirst(false); 
 
-        var posX = Phaser.Math.Between(0, config.width - 62);
+        var posX = Phaser.Math.Between(0, config.width - (64));
         var posY = 0;
 
         if(!tempEnemy)
@@ -166,7 +190,7 @@ class gameState extends Phaser.Scene
         _enemy.health--; 
         if(_enemy.health <= 0)
         {
-            this.createExplosion(_enemy.body.x, _enemy.body.y);
+            this.createExplosion(_enemy.x, _enemy.body.bottom);
             _enemy.health = 2.0; 
             _enemy.setActive(false);
             _enemy.body.reset(-100);
@@ -194,14 +218,31 @@ class gameState extends Phaser.Scene
         // Sounds ...
     }
 
+    createEnemyBullet(_posX, _posY)
+    {
+        var tempBullet = this.enemyBulletPool.getFirst(false);
+
+        if(!tempBullet)
+        {   
+            tempBullet = new bulletPrefab(this, _posX, _posY, 'enemy_bullet'); 
+            this.enemyBulletPool.add(tempBullet); 
+        }
+        else
+        {   
+            tempBullet.setActive(true); 
+            tempBullet.body.reset(this._posX, this._posY); 
+        }
+        tempBullet.body.setVelocityY(gamePrefs.ENEMY_BULLET_SPPED); 
+        // Sounds ...
+    }
+
     createExplosion(_posX, _posY)
     {
         var tempExplosion = this.explosionPool.getFirst(false); 
 
         if(!tempExplosion)
         {
-            tempExplosion = this.add.sprite(_posX, _posY, 'explosion').setScale(3);
-            tempExplosion.anims.play('explote'); 
+            tempExplosion = new explosionPrefab(this, _posX, _posY); 
             this.explosionPool.add(tempExplosion); 
         }
         else
@@ -211,6 +252,31 @@ class gameState extends Phaser.Scene
             tempExplosion.body.reset(_posX, _posY);
         }
         // Sounds ...
+    }
+
+    killPlayer(_player, _enemyBullet)
+    {
+        _enemyBullet.setActive(false); 
+        _enemyBullet.body.reset(-200); 
+
+        _player.health--; 
+        this.armor.setFrame(_player.health); 
+        this.createExplosion(_player.x, _player.body.top); 
+        if(_player.health <= 0)
+        { 
+            this.time.addEvent(
+                {
+                    delay: 1 * 1000, 
+                    callback: this.resetLevel,
+                    callbackScope: this, 
+                    loop: false
+                });
+        }
+    }
+
+    resetLevel()
+    {
+        this.scene.restart(); 
     }
 
     update()
