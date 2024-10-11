@@ -11,11 +11,11 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.anims.play('idle'); 
 
         // Variable 
-        this.health = 1; 
+        this.health = 4; 
     }
 
     spawn()
     {
-        this.health = 1; 
+        this.health = 4; 
     }
 }

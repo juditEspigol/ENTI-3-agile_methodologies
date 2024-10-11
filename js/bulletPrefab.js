@@ -6,8 +6,10 @@ class bulletPrefab extends Phaser.GameObjects.Sprite
         _scene.add.existing(this);
     }
 
-    preUpdate()
+    preUpdate(_time, _delta)
     {
+        super.preUpdate(_time, _delta);
+
         if(this.y <= 0)
         {
             this.setActive(false); 

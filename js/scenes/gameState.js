@@ -33,6 +33,7 @@ class gameState extends Phaser.Scene
        // Load spaceship
        this.load.spritesheet('player', 'naveAnim.png', 
        {frameWidth: 16, frameHeight: 24}); 
+
     }
 
     create()
@@ -49,63 +50,21 @@ class gameState extends Phaser.Scene
         // Last layer --> Background variables
         this.bg_back = this.add.tileSprite(0, 0, config.width, config.height, 'bg_back').setOrigin(0); 
         this.bg_frontal = this.add.tileSprite(0, 0, config.width, config.height, 'bg_frontal').setOrigin(0); 
-
-        // Enemy instance
-        this.time.addEvent(
-            {
-                delay: 2 * 1000, 
-                callback: this.createEnemy,
-                callbackScope: this, 
-                loop: true
-            });
-
-        // Bullet instance
-        this.cursors.space.on
-        (
-            'up',
-            function()
-            {
-                this.createBullet();
-            }, 
-            this // contexto del this dentro de la funcion pasa a ser el de la escena
-        ) ;
-
-        // Collision enemy with bullet
-        this.physics.add.overlap
-        (
-            this.bulletPool, // obj 1
-            this.enemyPool, // obj 2
-            this.killEnemy, // callback
-            null, // process callback: lo que devolveria el callback
-            this // callback context
-        );
+        // 1st layer --> Load UI
+        this.armor = this.add.sprite(5, 5, 'armor').setOrigin(0).setFrame(4).setDepth(1); 
 
         // 2nd layer --> Spaceship animation
         this.spaceship = new playerPrefab(this, config.width * 0.5, config.height * 0.95);
 
-        // Collision enemy with bullet
-        this.physics.add.overlap
-        (
-            this.spaceship, // obj 1
-            this.enemyBulletPool, // obj 2
-            this.killPlayer, // callback
-            null, // process callback: lo que devolveria el callback
-            this // callback context
-        );
+        // Instanicate elements
+        this.instanciateEnemy(); 
+        this.instanciateBullet(); 
 
-        this.physics.add.overlap
-        (
-            this.spaceship, // obj 1
-            this.enemyPool, // obj 2
-            this.killPlayer, // callback
-            null, // process callback: lo que devolveria el callback
-            this // callback context
-        );
-
-        // 1st layer --> Load UI
-        this.armor = this.add.sprite(5, 5, 'armor').setOrigin(0).setFrame(4).setDepth(1); 
+        //Collisions
+        this.detectCollisions(); 
     }
 
+    // Animations
     loadAnimationSpaceship()
     {
         // Make the transition for the spritesheets
@@ -148,11 +107,11 @@ class gameState extends Phaser.Scene
                 key: 'explote',
                 frames: this.anims.generateFrameNumbers('explosion', {start: 0, end: 4}),
                 frameRate: 10,
-                repeat: 0,
-                hideOnComplete: true
+                repeat: 0
             });
     }
 
+    // Pools
     loadPools()
     {
         this.enemyPool = this.physics.add.group(); 
@@ -161,11 +120,100 @@ class gameState extends Phaser.Scene
         this.explosionPool = this.add.group(); 
     }
 
+    // Instanciate elements
+    instanciateEnemy()
+    {
+        this.time.addEvent(
+            {
+                delay: 2 * 1000, 
+                callback: this.createEnemy,
+                callbackScope: this, 
+                loop: true
+            });
+    }
+    instanciateBullet()
+    {
+        this.cursors.space.on
+        (
+            'up',
+            function() { this.createBullet(); }, 
+            this // contexto del this dentro de la funcion pasa a ser el de la escena
+        ) ;
+    }
+
+    // Collisions
+    detectCollisions()
+    {
+        // Collision enemy with bullet
+        this.physics.add.overlap
+        (
+            this.bulletPool, // obj 1
+            this.enemyPool, // obj 2
+            this.killEnemy, // callback
+            null, // process callback: lo que devolveria el callback
+            this // callback context
+        );
+       // Collision enemy with bullet and with enemy
+       this.physics.add.overlap
+       (
+           this.spaceship, // obj 1
+           this.enemyBulletPool, // obj 2
+           this.killPlayer, // callback
+           null, // process callback: lo que devolveria el callback
+           this // callback context
+       );
+       this.physics.add.overlap
+       (
+           this.spaceship, // obj 1
+           this.enemyPool, // obj 2
+           this.killPlayer, // callback
+           null, // process callback: lo que devolveria el callback
+           this // callback context
+       );
+    }
+    killEnemy(_bullet, _enemy) // be carefull with the order
+    {   
+        _bullet.setActive(false);
+        this.createExplosion(_bullet.x, _bullet.body.top, 2);
+        _bullet.body.reset(-300);
+
+        _enemy.health--; 
+        if(_enemy.health <= 0)
+        {
+            this.createExplosion(_enemy.x, _enemy.body.bottom, 4);
+            _enemy.desactivate();
+            // update score ...
+            // drop power ups ...
+        }
+    }
+    killPlayer(_player, _collision)
+    {
+        _collision.setActive(false); 
+        this.createExplosion(_collision.x, _collision.body.bottom, 2); 
+        _collision.body.reset(-1000); 
+
+        _player.health--; 
+        // Update UI
+        this.armor.setFrame(_player.health); 
+        if(_player.health <= 0)
+        { 
+            this.createExplosion(_player.x, _player.body.top, 4); 
+            this.time.addEvent(
+                {
+                    delay: 1 * 1000, 
+                    callback: this.resetLevel,
+                    callbackScope: this, 
+                    loop: false
+                });
+        }
+    }
+
+    // Creations
     createEnemy()
     {
         var tempEnemy = this.enemyPool.getFirst(false); 
 
-        var posX = Phaser.Math.Between(0, config.width - (64));
+        var posX = Phaser.Math.Between(32, config.width - (32));
         var posY = 0;
 
         if(!tempEnemy)
@@ -181,24 +229,6 @@ class gameState extends Phaser.Scene
         tempEnemy.body.setVelocityY(gamePrefs.ENEMY_SPEED);
         // Sounds ...
     }
-
-    killEnemy(_bullet, _enemy) // be carefull with the order
-    {   // 1 impact --> bullet with enemy
-        _bullet.setActive(false);
-        _bullet.body.reset(-200);
-
-        _enemy.health--; 
-        if(_enemy.health <= 0)
-        {
-            this.createExplosion(_enemy.x, _enemy.body.bottom);
-            _enemy.health = 2.0; 
-            _enemy.setActive(false);
-            _enemy.body.reset(-100);
-            // update score ...
-            // drop power ups ...
-        }
-    }
-
     createBullet()
     {
         var tempBullet = this.bulletPool.getFirst(false); // search for the first bullet not active
@@ -217,7 +247,6 @@ class gameState extends Phaser.Scene
         tempBullet.body.setVelocityY(gamePrefs.BULLET_SPEED); 
         // Sounds ...
     }
-
     createEnemyBullet(_posX, _posY)
     {
         var tempBullet = this.enemyBulletPool.getFirst(false);
@@ -230,48 +259,27 @@ class gameState extends Phaser.Scene
         else
         {   
             tempBullet.setActive(true); 
-            tempBullet.body.reset(this._posX, this._posY); 
+            tempBullet.body.reset(_posX, _posY); 
         }
         tempBullet.body.setVelocityY(gamePrefs.ENEMY_BULLET_SPPED); 
         // Sounds ...
     }
-
-    createExplosion(_posX, _posY)
+    createExplosion(_posX, _posY, _scale)
     {
         var tempExplosion = this.explosionPool.getFirst(false); 
 
         if(!tempExplosion)
         {
-            tempExplosion = new explosionPrefab(this, _posX, _posY); 
+            tempExplosion = new explosionPrefab(this, _posX, _posY, _scale); 
             this.explosionPool.add(tempExplosion); 
         }
         else
         {
             tempExplosion.setActive(true);
             tempExplosion.anims.play('explote'); 
-            tempExplosion.body.reset(_posX, _posY);
+            tempExplosion.setPosition(_posX, _posY).setScale(_scale); 
         }
         // Sounds ...
-    }
-
-    killPlayer(_player, _enemyBullet)
-    {
-        _enemyBullet.setActive(false); 
-        _enemyBullet.body.reset(-200); 
-
-        _player.health--; 
-        this.armor.setFrame(_player.health); 
-        this.createExplosion(_player.x, _player.body.top); 
-        if(_player.health <= 0)
-        { 
-            this.time.addEvent(
-                {
-                    delay: 1 * 1000, 
-                    callback: this.resetLevel,
-                    callbackScope: this, 
-                    loop: false
-                });
-        }
     }
 
     resetLevel()
@@ -300,6 +308,5 @@ class gameState extends Phaser.Scene
         {
             this.spaceship.anims.play('idle', true);
         }
-
     }
 }

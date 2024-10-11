@@ -7,15 +7,13 @@ class enemyPrefab extends Phaser.GameObjects.Sprite
         
         this.anims.play('idleEnemy'); 
 
-        this.shoot();
-
         _scene.time.addEvent(
-            {
-                delay: Phaser.Math.Between(3 * 1000, 5 * 1000), 
-                callback: this.shoot,
-                callbackScope: this, 
-                loop: true
-            });
+        {
+            delay: Phaser.Math.Between(2 * 1000, 5 * 1000), 
+            callback: this.shoot,
+            callbackScope: this, 
+            loop: true
+        });
         
         // Variables
         this.health = 2;
@@ -36,7 +34,10 @@ class enemyPrefab extends Phaser.GameObjects.Sprite
         this.scene.createEnemyBullet(this.x, this.y); 
     }
 
-    spawn()
+    desactivate()
     {
+        this.health = 2.0; 
+        this.setActive(false);
+        this.setPosition(-500, -500);
     }
 }
