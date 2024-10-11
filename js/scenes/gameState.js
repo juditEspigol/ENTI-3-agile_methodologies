@@ -158,7 +158,7 @@ class gameState extends Phaser.Scene
        (
            this.spaceship, // obj 1
            this.enemyBulletPool, // obj 2
-           this.killPlayer, // callback
+           this.killPlayerByBullet, // callback
            null, // process callback: lo que devolveria el callback
            this // callback context
        );
@@ -166,7 +166,7 @@ class gameState extends Phaser.Scene
        (
            this.spaceship, // obj 1
            this.enemyPool, // obj 2
-           this.killPlayer, // callback
+           this.killPlayerByEnemy, // callback
            null, // process callback: lo que devolveria el callback
            this // callback context
        );
@@ -186,7 +186,7 @@ class gameState extends Phaser.Scene
             // drop power ups ...
         }
     }
-    killPlayer(_player, _collision)
+    killPlayerByBullet(_player, _collision)
     {
         _collision.setActive(false); 
         this.createExplosion(_collision.x, _collision.body.bottom, 2); 
@@ -206,6 +206,23 @@ class gameState extends Phaser.Scene
                     loop: false
                 });
         }
+    }
+    killPlayerByEnemy(_player, _collision)
+    {
+        _collision.setActive(false); 
+        this.createExplosion(_collision.x, _collision.body.bottom, 2); 
+        _collision.body.reset(-100); 
+
+        // Update UI
+        this.armor.setFrame(0); 
+        this.createExplosion(_player.x, _player.body.top, 4); 
+        this.time.addEvent(
+            {
+                delay: 1 * 1000, 
+                callback: this.resetLevel,
+                callbackScope: this, 
+                loop: false
+            });
     }
 
     // Creations
