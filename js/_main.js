@@ -11,7 +11,12 @@ var config =
     type: Phaser.AUTO, 
     width: 370, 
     height: 550,
-    scene: [gameState], 
+    scene: [menuState, gameState], // array con los niveles/pantallas/scenas
+    scale:
+    {
+        mode:Phaser.Scale.FIT,
+        autoCenter:Phaser.Scale.CENTER_BOTH
+    },
     render: 
     {
         pixelArt:true

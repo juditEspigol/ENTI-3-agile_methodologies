@@ -107,7 +107,9 @@ class gameState extends Phaser.Scene
                 key: 'explote',
                 frames: this.anims.generateFrameNumbers('explosion', {start: 0, end: 4}),
                 frameRate: 10,
-                repeat: 0
+                repeat: 0,
+                showOnStart:true,
+                hideOnComplete:true
             });
     }
 
@@ -264,13 +266,13 @@ class gameState extends Phaser.Scene
         tempBullet.body.setVelocityY(gamePrefs.BULLET_SPEED); 
         // Sounds ...
     }
-    createEnemyBullet(_posX, _posY)
+    createEnemyBullet(_posX, _posY, _sprTag = 'bullet')
     {
         var tempBullet = this.enemyBulletPool.getFirst(false);
 
         if(!tempBullet)
         {   
-            tempBullet = new bulletPrefab(this, _posX, _posY, 'enemy_bullet'); 
+            tempBullet = new bulletPrefab(this, _posX, _posY, _sprTag); 
             this.enemyBulletPool.add(tempBullet); 
         }
         else

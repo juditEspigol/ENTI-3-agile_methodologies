@@ -31,7 +31,7 @@ class enemyPrefab extends Phaser.GameObjects.Sprite
 
     shoot()
     {
-        this.scene.createEnemyBullet(this.x, this.y); 
+        this.scene.createEnemyBullet(this.x, this.y, 'enemy_bullet'); 
     }
 
     desactivate()
