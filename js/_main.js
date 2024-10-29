@@ -3,7 +3,8 @@ var gamePrefs =
     SPACESHIP_SPEED: 2, 
     BULLET_SPEED: -100,
     ENEMY_BULLET_SPPED: 100,
-    ENEMY_SPEED: 40
+    ENEMY_SPEED: 40, 
+    POWER_UP_SPEED: 100
 }
 
 var config = 
@@ -11,7 +12,7 @@ var config =
     type: Phaser.AUTO, 
     width: 370, 
     height: 550,
-    scene: [menuState, gameState], // array con los niveles/pantallas/scenas
+    scene: [menuState, gameState, gameOverState], // array con los niveles/pantallas/scenas
     scale:
     {
         mode:Phaser.Scale.FIT,
