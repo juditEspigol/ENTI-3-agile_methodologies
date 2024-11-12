@@ -1,33 +1,42 @@
-var gamePrefs = 
+var gamePrefs=
 {
-    gameWidth: 960, 
-    gameHeight: 540,
-    level1Width: 1280, // 40*32
-    level1Height: 800, // 25*32
-    GRAVITY: 1000, 
-    HERO_SPEED: 200, 
-    HERO_JUMP: 450
+    gameWidth:960,
+    gameHeight:540,
+    level1Width:1280, //40*32
+    level1Height:800, //25*32
+    GRAVITY:1000,
+    HERO_SPEED:200,
+    HERO_JUMP:-450,
+    ENEMY_JUMPER_SPEED:150, 
+    HERO_MAX_LIVES: 7
 }
 
 var config = 
 {
-    type: Phaser.AUTO, 
-    width: gamePrefs.gameWidth, 
+    type: Phaser.AUTO,
+    width: gamePrefs.gameWidth,
     height: gamePrefs.gameHeight,
-    scene: [sceneLevel1], 
+    scene:[level1], //array con las escenas
     render:
     {
         pixelArt:true
     },
     physics:
     {
-        default: 'arcade', 
+        default:'arcade',
         arcade:
         {
-            gravity: {y:gamePrefs.GRAVITY}, 
-            debug: true
+            gravity:{y:gamePrefs.GRAVITY},
+            debug:true
         }
+    },
+    scale:
+    {
+        mode:Phaser.Scale.FIT,
+        width:gamePrefs.gameWidth/2,
+        height:gamePrefs.gameHeight/2,
+        autoCenter:Phaser.Scale.CENTER_BOTH
     }
 }
 
-var game = new Phaser.Game(config);
+var juego = new Phaser.Game(config);
