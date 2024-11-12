@@ -42,13 +42,19 @@ class enemyPrefab extends Phaser.GameObjects.Sprite
 
     movement()
     {
-        if(this.body.blocked.left || this.body.blocked.right || !this.body.blocked.down)
+        if(this.conditionPatrol())
         {
             this.direction *= -1;
             this.enemy.flipX = !this.enemy.flipX;
             
             this.enemy.body.setVelocityX(gamePrefs.ENEMY_JUMPER_SPEED*this.direction);    
         }
+    }
+
+    conditionPatrol()
+    {
+        console.log('child responsability'); 
+        return true; 
     }
 
     preUpdate(time,delta)

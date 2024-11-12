@@ -90,6 +90,10 @@ class level1 extends Phaser.Scene
                         object = new slimePrefab(this, element.x, element.y); 
                         object.setHealth(element.properties[0].value); 
                         break; 
+                    case 'flier':
+                        object = new flierPrefab(this, element.x, element.y); 
+                        object.setHealth(element.properties[0].value); 
+                        break; 
                     case 'gem':
                         object = new gemPrefab(this, element.x, element.y); 
                         object.setPrice(element.properties[0].value); 
@@ -132,6 +136,14 @@ class level1 extends Phaser.Scene
                 key: 'run_slime',
                 frames:this.anims.generateFrameNumbers('slime', 
                 {start:0, end: 3}),
+                frameRate: 10,
+                repeat: -1
+            });
+        this.anims.create(
+            {
+                key: 'run_flier',
+                frames:this.anims.generateFrameNumbers('flier', 
+                {start:0, end: 2}),
                 frameRate: 10,
                 repeat: -1
             });

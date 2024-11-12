@@ -1,9 +1,10 @@
-class jumperPrefab extends enemyPrefab
+class flierPrefab extends enemyPrefab
 {
-    constructor(_scene, _posX, _posY, _spriteTag = 'jumper')
+    constructor(_scene, _posX, _posY, _spriteTag = 'flier')
     { 
         super(_scene, _posX, _posY, _spriteTag);
-        this.jumper = this; 
+        this.body.setAllowGravity(false);
+        this.flier = this; 
 
         this.health = 2;
     }

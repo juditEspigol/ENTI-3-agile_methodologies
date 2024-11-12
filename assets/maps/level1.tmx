@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="left-up" width="40" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="7">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="left-up" width="40" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="19">
  <editorsettings>
   <export target="level1.json" format="json"/>
  </editorsettings>
@@ -12,7 +12,7 @@
  <tileset firstgid="45" name="tileset_enemigos_objetos" tilewidth="32" tileheight="32" tilecount="4" columns="4">
   <image source="../tilesets/tileset_enemigos_objetos.png" trans="ff00ff" width="128" height="32"/>
  </tileset>
- <imagelayer id="2" name="referencia_level1" opacity="0.3">
+ <imagelayer id="2" name="referencia_level1" visible="0" opacity="0.3">
   <image source="references/level_1.jpg" width="1286" height="808"/>
  </imagelayer>
  <layer id="7" name="layer_elements" width="40" height="25">
@@ -51,27 +51,93 @@
    </properties>
    <point/>
   </object>
-  <object id="2" name="slime_01" type="slime" x="881.333" y="270.667">
+  <object id="2" name="slime_01" type="slime" x="880" y="272">
    <properties>
     <property name="health" type="int" value="2"/>
    </properties>
    <point/>
   </object>
-  <object id="3" name="slime_02" type="slime" x="240" y="497.333">
+  <object id="3" name="slime_02" type="slime" x="240" y="496">
    <properties>
     <property name="health" type="int" value="2"/>
    </properties>
    <point/>
   </object>
-  <object id="4" name="slime_03" type="slime" x="820" y="750.667">
+  <object id="4" name="slime_03" type="slime" x="816" y="752">
    <properties>
     <property name="health" type="int" value="2"/>
    </properties>
    <point/>
   </object>
-  <object id="5" name="gem_01" type="gem" x="461.333" y="236">
+  <object id="5" name="gem_01" type="gem" x="464" y="240">
    <properties>
     <property name="price" type="int" value="50"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="8" name="gem_02" type="gem" x="496" y="240">
+   <properties>
+    <property name="price" type="int" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="9" name="gem_03" type="gem" x="528" y="240">
+   <properties>
+    <property name="price" type="int" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="11" name="gem_06" type="gem" x="432" y="496">
+   <properties>
+    <property name="price" type="int" value="100"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="13" name="gem_07" type="gem" x="464" y="528">
+   <properties>
+    <property name="price" type="int" value="50"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="14" name="gem_08" type="gem" x="1168" y="720">
+   <properties>
+    <property name="price" type="int" value="75"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="16" name="gem_10" type="gem" x="1168" y="688">
+   <properties>
+    <property name="price" type="int" value="75"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="17" name="gem_11" type="gem" x="1200" y="688">
+   <properties>
+    <property name="price" type="int" value="75"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="15" name="gem_09" type="gem" x="1200" y="720">
+   <properties>
+    <property name="price" type="int" value="75"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="12" name="gem_05" type="gem" x="400" y="464">
+   <properties>
+    <property name="price" type="int" value="50"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="10" name="gem_04" type="gem" x="560" y="240">
+   <properties>
+    <property name="price" type="int" value="50"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="18" name="flier_01" type="flier" x="528" y="624">
+   <properties>
+    <property name="health" type="int" value="4"/>
    </properties>
    <point/>
   </object>
